@@ -1,15 +1,26 @@
 package metadata
 
 import (
-	"errors"
 	"io"
+	"net/http"
+	"net/http/cookiejar"
+	"time"
 
 	"github.com/mcmillan/socialite/store"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/yhat/scrape"
-	"golang.org/x/net/html"
-	"golang.org/x/net/html/atom"
+	"golang.org/x/net/publicsuffix"
+)
+
+var (
+	cookieJar, _ = cookiejar.New(&cookiejar.Options{
+		PublicSuffixList: publicsuffix.List,
+	})
+
+	httpClient = &http.Client{
+		Timeout: 5 * time.Second,
+		Jar:     cookieJar,
+	}
 )
 
 func ParseURL(url string) (link store.Link, err error) {
@@ -20,7 +31,7 @@ func ParseURL(url string) (link store.Link, err error) {
 
 	log.WithFields(logFields).Info("Looking for metadata...")
 
-	html, realURL, err := fetchPageHTML(url)
+	html, finalURL, err := fetchPageHTML(url)
 
 	if err != nil {
 		log.WithFields(logFields).Error(err)
@@ -36,7 +47,7 @@ func ParseURL(url string) (link store.Link, err error) {
 
 	link = store.Link{
 		Title: title,
-		URL:   realURL,
+		URL:   finalURL,
 	}
 
 	return
@@ -49,74 +60,7 @@ func fetchPageHTML(url string) (io.Reader, string, error) {
 		return nil, "", err
 	}
 
-	return res.Body, res.Request.URL.String(), err
-}
+	finalURL := normalizeURL(res.Request.URL.String())
 
-func findTitle(r io.Reader) (title string, err error) {
-	doc, err := html.Parse(r)
-
-	if err != nil {
-		return
-	}
-
-	title = findTwitterTitle(doc)
-	if title != "" {
-		return
-	}
-
-	title = findOpenGraphTitle(doc)
-	if title != "" {
-		return
-	}
-
-	title = findHTMLTitle(doc)
-	if title != "" {
-		return
-	}
-
-	err = errors.New("Unable to ascertain title")
-
-	return
-}
-
-func findOpenGraphTitle(doc *html.Node) string {
-	el, found := scrape.Find(doc, func(n *html.Node) bool {
-		if n.DataAtom == atom.Meta {
-			return scrape.Attr(n, "property") == "og:title" && scrape.Attr(n, "content") != ""
-		}
-
-		return false
-	})
-
-	if !found {
-		return ""
-	}
-
-	return scrape.Attr(el, "content")
-}
-
-func findTwitterTitle(doc *html.Node) string {
-	el, found := scrape.Find(doc, func(n *html.Node) bool {
-		if n.DataAtom == atom.Meta {
-			return scrape.Attr(n, "name") == "twitter:title" && scrape.Attr(n, "content") != ""
-		}
-
-		return false
-	})
-
-	if !found {
-		return ""
-	}
-
-	return scrape.Attr(el, "content")
-}
-
-func findHTMLTitle(doc *html.Node) string {
-	el, found := scrape.Find(doc, scrape.ByTag(atom.Title))
-
-	if !found {
-		return ""
-	}
-
-	return scrape.Text(el)
+	return res.Body, finalURL, err
 }

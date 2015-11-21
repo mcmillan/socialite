@@ -68,10 +68,7 @@ func Popular() (links []Link, err error) {
 		"socialite:urls",
 		"+inf",
 		"-inf",
-		"WITHSCORES",
-		"LIMIT",
-		0,
-		10))
+		"WITHSCORES"))
 
 	if err != nil {
 		log.WithFields(log.Fields{"package": "store"}).Error(err)
