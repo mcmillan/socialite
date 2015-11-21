@@ -1,10 +1,12 @@
 package main
 
 import (
+	"flag"
+
 	"github.com/mcmillan/socialite/collector"
 	"github.com/mcmillan/socialite/store"
+	"github.com/mcmillan/socialite/web"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/joho/godotenv"
 )
 
@@ -12,15 +14,17 @@ func main() {
 	defer store.Close()
 
 	godotenv.Load()
-	collector.Run()
 
-	p, err := store.Popular()
+	modePointer := flag.String("mode", "", "Either `web` or `collect`")
+	flag.Parse()
 
-	if err != nil {
-		log.Panic(err)
-	}
+	mode := string(*modePointer)
 
-	for _, l := range p {
-		log.Info(l)
+	if mode == "web" {
+		web.Serve()
+	} else if mode == "collect" {
+		collector.Run()
+	} else {
+		flag.Usage()
 	}
 }

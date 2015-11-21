@@ -1,0 +1,1 @@
+web: socialite -mode="web"

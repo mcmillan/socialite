@@ -19,9 +19,9 @@ const (
 var redisClient redis.Conn
 
 type Link struct {
-	Title string
-	URL   string
-	Score int64
+	Title string `json:"title"`
+	URL   string `json:"url"`
+	Score int64  `json:"score"`
 }
 
 func (l *Link) ID() string {
@@ -193,7 +193,9 @@ func Expire() (err error) {
 }
 
 func Close() {
-	redisClient.Close()
+	if redisClient != nil {
+		redisClient.Close()
+	}
 }
 
 func metadataKey(id string) string {
