@@ -31,7 +31,10 @@ func (l *Link) ID() string {
 }
 
 func SinceID() (sinceID string, err error) {
-	verifyConnection()
+	err = verifyConnection()
+	if err != nil {
+		return
+	}
 
 	sinceID, err = redis.String(redisClient.Do("GET", "socialite:since_id"))
 
@@ -44,7 +47,10 @@ func SinceID() (sinceID string, err error) {
 }
 
 func SetSinceID(sinceID string) (err error) {
-	verifyConnection()
+	err = verifyConnection()
+	if err != nil {
+		return
+	}
 
 	_, err = redisClient.Do("SET", "socialite:since_id", sinceID)
 
@@ -52,7 +58,11 @@ func SetSinceID(sinceID string) (err error) {
 }
 
 func Popular() (links []Link, err error) {
-	verifyConnection()
+	err = verifyConnection()
+	if err != nil {
+		return
+	}
+
 	scoredLinks, err := redis.Values(redisClient.Do(
 		"ZREVRANGEBYSCORE",
 		"socialite:urls",
@@ -113,7 +123,10 @@ func Popular() (links []Link, err error) {
 }
 
 func Add(link Link) (err error) {
-	verifyConnection()
+	err = verifyConnection()
+	if err != nil {
+		return
+	}
 
 	expiryDate := time.Now().Add(decay).Unix()
 
@@ -135,7 +148,10 @@ func Add(link Link) (err error) {
 }
 
 func Expire() (err error) {
-	verifyConnection()
+	err = verifyConnection()
+	if err != nil {
+		return
+	}
 
 	expireAt := time.Now().Unix()
 	expiredLinks, err := redis.Values(redisClient.Do(
@@ -202,18 +218,17 @@ func metadataKey(id string) string {
 	return fmt.Sprintf("socialite:urls:%s:data", id)
 }
 
-func verifyConnection() {
+func verifyConnection() (err error) {
 	if redisClient != nil {
 		return
 	}
 
 	log.WithField("package", "store").Info("Connecting to Redis...")
-	rc, err := redis.DialURL(os.Getenv("REDIS_URL"))
+	redisClient, err = redis.DialURL(os.Getenv("REDIS_URL"))
 
 	if err != nil {
-		// Should this be fatal?
-		log.WithField("package", "store").Fatal(err)
+		log.WithField("package", "store").Error(err)
 	}
 
-	redisClient = rc
+	return
 }
