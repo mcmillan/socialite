@@ -1,24 +1,20 @@
 package metadata
 
 import (
-	"crypto/sha1"
-	"io"
 	"net/http"
-	"strings"
+	"net/http/cookiejar"
 	"time"
+
+	"golang.org/x/net/publicsuffix"
 )
 
-var httpClient = &http.Client{
-	Timeout: 5 * time.Second,
-}
+var (
+	cookieJar, _ = cookiejar.New(&cookiejar.Options{
+		PublicSuffixList: publicsuffix.List,
+	})
 
-type Metadata struct {
-	RealURL string
-	Title   string
-}
-
-func (md *Metadata) ID() string {
-	h := sha1.New()
-	io.WriteString(h, strings.ToLower(md.RealURL))
-	return string(h.Sum(nil))
-}
+	httpClient = &http.Client{
+		Timeout: 5 * time.Second,
+		Jar:     cookieJar,
+	}
+)

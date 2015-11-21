@@ -4,13 +4,15 @@ import (
 	"errors"
 	"io"
 
+	"github.com/mcmillan/socialite/store"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
 
-func ParseURL(url string) (md Metadata, err error) {
+func ParseURL(url string) (link store.Link, err error) {
 	logFields := log.Fields{
 		"package": "metadata",
 		"url":     url,
@@ -32,9 +34,9 @@ func ParseURL(url string) (md Metadata, err error) {
 		return
 	}
 
-	md = Metadata{
-		RealURL: realURL,
-		Title:   title,
+	link = store.Link{
+		Title: title,
+		URL:   realURL,
 	}
 
 	return

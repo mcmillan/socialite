@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	maxDepth = 10
+	maxDepth = 15
 )
 
 type ListStatusesResponse []Status
@@ -36,6 +36,7 @@ func GetListStatuses(sinceID string) (ListStatusesResponse, error) {
 			"owner_screen_name": os.Getenv("TWITTER_LIST_OWNER_NAME"),
 			"since_id":          sinceID,
 			"max_id":            maxID,
+			"include_rts":       "true",
 		}, &listStatusesResponse)
 
 		if err != nil {
