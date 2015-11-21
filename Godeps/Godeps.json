@@ -1,0 +1,27 @@
+{
+	"ImportPath": "github.com/mcmillan/socialite",
+	"GoVersion": "go1.4.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.8.7-47-ga22723f",
+			"Rev": "a22723f16efea2e89b7bd67d10ed077c47c14eb4"
+		},
+		{
+			"ImportPath": "github.com/joho/godotenv",
+			"Comment": "v1-8-g443e926",
+			"Rev": "443e926da0d793d3b3f32118b1e4ba52ada26503"
+		},
+		{
+			"ImportPath": "github.com/yhat/scrape",
+			"Rev": "47d070048ae58bf228dfdfcfaf1d1c6abc00620e"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html",
+			"Rev": "5627bad10b821d907ac4dc81fb3535ec7dd81c2b"
+		}
+	]
+}
