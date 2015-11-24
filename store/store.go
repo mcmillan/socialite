@@ -67,7 +67,7 @@ func Popular() (links []Link, err error) {
 		"ZREVRANGEBYSCORE",
 		"socialite:urls",
 		"+inf",
-		"-inf",
+		"2",
 		"WITHSCORES"))
 
 	if err != nil {

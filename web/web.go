@@ -28,5 +28,16 @@ func popularLinks(r render.Render) {
 		return
 	}
 
-	r.JSON(200, links)
+	var formattedLinks []map[string]interface{}
+
+	for _, link := range links {
+		formattedLinks = append(formattedLinks, map[string]interface{}{
+			"id":    link.ID(),
+			"title": link.Title,
+			"url":   link.URL,
+			"score": link.Score,
+		})
+	}
+
+	r.JSON(200, formattedLinks)
 }
